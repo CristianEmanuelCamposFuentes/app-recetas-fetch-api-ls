@@ -160,6 +160,7 @@ function iniciarApp(){
             if (existeStorage(idMeal)){
                 eliminarFavorito(idMeal);
                 btnFavorito.textContent = 'Guardar Favorito';
+                mostrarToast('Eliminado Correctamente');
                 return
             }
             // Se envia un objeto porque se requiere determinada informacion
@@ -170,6 +171,7 @@ function iniciarApp(){
                 img: strMealThumb
             });
             btnFavorito.textContent = 'Eliminar Favorito';
+            mostrarToast('Agregado Correctamente');
         }
 
         const btnCerrarModal = document.createElement('button');
@@ -204,6 +206,14 @@ function iniciarApp(){
         return favoritos.some(favorito => favorito.id === id);    
     }
 
+    function mostrarToast(mensaje){
+        const toastDiv = document.querySelector('#toast');
+        const toastBody = document.querySelector('.toast-body');
+        // Se le debe pasar el div a donde se quiere agregar el toast
+        const toast = new bootstrap.Toast(toastDiv);
+        toastBody.textContent = mensaje;
+        toast.show();
+    }
 
     function limpiarHTML(selector) {
         while( selector.firstChild) {

@@ -1,13 +1,21 @@
 function iniciarApp(){
     
     const selectCategorias = document.querySelector('#categorias');
-    selectCategorias.addEventListener('change', seleccionarCategoria);
-    
     const resultado = document.querySelector('#resultado');
+    
+    if(selectCategorias){
+        selectCategorias.addEventListener('change', seleccionarCategoria);
+        obtenerCategorias();
+
+    }
+    const favoritosDiv = document.querySelector('.favoritos');
+    if(favoritosDiv){
+        obtenerFavoritos();
+    }
+    
     //Crear instancia de Modal
     const modal = new bootstrap.Modal('#modal', {});
     
-    obtenerCategorias();
 
     function obtenerCategorias(){
         const url = 'https://www.themealdb.com/api/json/v1/1/categories.php';
@@ -65,15 +73,15 @@ function iniciarApp(){
 
             const recetaImagen = document.createElement('img');
             recetaImagen.classList.add('card-img-top');
-            recetaImagen.alt = `Imagen de la receta ${strMeal}`;
-            recetaImagen.src = strMealThumb;
+            recetaImagen.alt = `Imagen de la receta ${strMeal ?? receta.titulo}`;
+            recetaImagen.src = strMealThumb ?? receta.img;
 
             const recetaCardBody = document.createElement('div');
             recetaCardBody.classList.add('card-body');
             
             const recetaHeading = document.createElement('h3');
             recetaHeading.classList.add('card-title', 'mb-3', 'text-center');
-            recetaHeading.textContent = strMeal;
+            recetaHeading.textContent = strMeal ?? receta.titulo;
 
             const recetaButton = document.createElement('button');
             recetaButton.classList.add('btn', 'btn-danger', 'w-100');
@@ -83,7 +91,7 @@ function iniciarApp(){
             // Se utiliza onclick porque el elemento no existe en el HTML cuando JS se ejecute
             // Un addEventListener no funcionaría
             recetaButton.onclick = function() {
-                seleccionarReceta(idMeal);
+                seleccionarReceta(idMeal ?? receta.id);
             }
 
 
@@ -193,12 +201,23 @@ function iniciarApp(){
         // se realiza la accion de la derecha
         const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
         localStorage.setItem('favoritos', JSON.stringify([...favoritos, receta]));
+
+        if(favoritosDiv){
+            const nuevosFavoritos = JSON.parse(localStorage.getItem('favoritos'));
+
+            limpiarHTML(favoritosDiv);
+            mostrarRecetas(nuevosFavoritos);
+        }
     }
 
     function eliminarFavorito(id){
         const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
         const nuevosFavoritos = favoritos.filter(favorito => favorito.id !== id);
         localStorage.setItem('favoritos', JSON.stringify(nuevosFavoritos));
+        if(favoritosDiv){
+            limpiarHTML(favoritosDiv);
+            mostrarRecetas(nuevosFavoritos);
+        }
     }
 
     function existeStorage(id){
@@ -213,6 +232,20 @@ function iniciarApp(){
         const toast = new bootstrap.Toast(toastDiv);
         toastBody.textContent = mensaje;
         toast.show();
+    }
+
+    function obtenerFavoritos(){
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+
+        if(favoritos.length){
+            mostrarRecetas(favoritos);
+            return
+        }
+        const noFavoritos = document.createElement('p');
+        noFavoritos.textContent = 'No hay favoritos aún';
+        noFavoritos.classList.add('fs-4', 'text-center', 'font-bold', 'mt-5');
+        favoritosDiv.appendChild(noFavoritos);
+
     }
 
     function limpiarHTML(selector) {

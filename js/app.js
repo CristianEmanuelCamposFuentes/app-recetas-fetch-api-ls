@@ -152,7 +152,25 @@ function iniciarApp(){
         // Botones de cerrar y favorito
         const btnFavorito = document.createElement('button');
         btnFavorito.classList.add('btn', 'btn-danger', 'col');
-        btnFavorito.textContent = 'Guardar Favorito';
+        btnFavorito.textContent = existeStorage(idMeal) ? 'Eliminar Favorito' : 'Guardar Favorito';
+
+        // Almacenar en LocalStorage 
+        btnFavorito.onclick = function() {
+
+            if (existeStorage(idMeal)){
+                eliminarFavorito(idMeal);
+                btnFavorito.textContent = 'Guardar Favorito';
+                return
+            }
+            // Se envia un objeto porque se requiere determinada informacion
+            // para almacenarla en LocalStorage
+            agregarFavorito({
+                id: idMeal,
+                titulo: strMeal,
+                img: strMealThumb
+            });
+            btnFavorito.textContent = 'Eliminar Favorito';
+        }
 
         const btnCerrarModal = document.createElement('button');
         btnCerrarModal.classList.add('btn', 'btn-secondary', 'col');
@@ -164,11 +182,28 @@ function iniciarApp(){
         modalFooter.appendChild(btnFavorito);
         modalFooter.appendChild(btnCerrarModal);
 
-
         // Muestra el modal
         modal.show();
-
+        
     }
+    function agregarFavorito(receta) {
+        // Nullish coleascing '??' , si la expresion izquierda es null o indefined,
+        // se realiza la accion de la derecha
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        localStorage.setItem('favoritos', JSON.stringify([...favoritos, receta]));
+    }
+
+    function eliminarFavorito(id){
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        const nuevosFavoritos = favoritos.filter(favorito => favorito.id !== id);
+        localStorage.setItem('favoritos', JSON.stringify(nuevosFavoritos));
+    }
+
+    function existeStorage(id){
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        return favoritos.some(favorito => favorito.id === id);    
+    }
+
 
     function limpiarHTML(selector) {
         while( selector.firstChild) {
